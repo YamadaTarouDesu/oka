@@ -20,10 +20,9 @@ class IndexController extends Controller
      */
     public function index($id = '')
     {
-//        $redis    = Redis::connection();
+        $redis    = Redis::connection();
 //        $contents = $redis->get('contents');
         if (empty($contents)) {
-
             // ƒJƒeƒSƒŠŽæ“¾
             if (empty($id)) {
                 $this->_setObject();
@@ -51,7 +50,7 @@ class IndexController extends Controller
                 $this->_setObject('category', $id);
                 $contents['count'] = $this->_contents_obj->distinct('content')->count();
             }
-//            $redis->set('contents', json_encode($contents));
+            $redis->set('contents', json_encode($contents));
         } else {
             $contents = json_decode($contents);
         }
