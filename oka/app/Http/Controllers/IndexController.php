@@ -8,6 +8,7 @@ use App\Http\Requests;
 use App\Http\Controllers\Controller;
 use App\Content;
 use DB;
+use Redis;
 
 class IndexController extends Controller
 {
@@ -19,32 +20,40 @@ class IndexController extends Controller
      */
     public function index($id = '')
     {
-        // カテゴリ取得
-        if (empty($id)) {
-            $this->_setObject();
-            // トップ(表示)
-            $contents['list']  = $this->_contents_obj
-                                      ->orderBy('regist_date', 'desc')
-                                      ->groupBy('content')
-                                      ->take(59)
-                                      ->get()
-                                      ->toArray();
-            $this->_unsetObject();
-            $this->_setObject();
-            $contents['count'] = $this->_contents_obj->distinct('content')->count();
+//        $redis    = Redis::connection();
+//        $contents = $redis->get('contents');
+        if (empty($contents)) {
 
+            // カテゴリ取得
+            if (empty($id)) {
+                $this->_setObject();
+                // トップ(表示)
+                $contents['list']  = $this->_contents_obj
+                                          ->orderBy('regist_date', 'desc')
+                                          ->groupBy('content')
+                                          ->take(59)
+                                          ->get()
+                                          ->toArray();
+                $this->_unsetObject();
+                $this->_setObject();
+                $contents['count'] = $this->_contents_obj->distinct('content')->count();
+
+            } else {
+                // ジャンル選択
+                $this->_setObject('category', $id);
+                $contents['list']  = $this->_contents_obj
+                                          ->orderBy('regist_date', 'desc')
+                                          ->groupBy('content')
+                                          ->take(59)
+                                          ->get()
+                                          ->toArray();
+                $this->_unsetObject();
+                $this->_setObject('category', $id);
+                $contents['count'] = $this->_contents_obj->distinct('content')->count();
+            }
+//            $redis->set('contents', json_encode($contents));
         } else {
-            // ジャンル選択
-            $this->_setObject('category', $id);
-            $contents['list']  = $this->_contents_obj
-                                      ->orderBy('regist_date', 'desc')
-                                      ->groupBy('content')
-                                      ->take(59)
-                                      ->get()
-                                      ->toArray();
-            $this->_unsetObject();
-            $this->_setObject('category', $id);
-            $contents['count'] = $this->_contents_obj->distinct('content')->count();
+            $contents = json_decode($contents);
         }
         return view('index.index')->with(compact('contents'));
         
