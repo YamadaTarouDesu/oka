@@ -21,7 +21,7 @@ class IndexController extends Controller
     public function index($id = '')
     {
         $redis    = Redis::connection();
-//        $contents = $redis->get('contents');
+        $contents = $redis->get('contents');
         if (empty($contents)) {
             // ƒJƒeƒSƒŠŽæ“¾
             if (empty($id)) {
@@ -52,7 +52,7 @@ class IndexController extends Controller
             }
             $redis->set('contents', json_encode($contents));
         } else {
-            $contents = json_decode($contents);
+            $contents = json_decode($contents, true);
         }
         return view('index.index')->with(compact('contents'));
         
